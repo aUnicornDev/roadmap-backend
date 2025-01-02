@@ -48,7 +48,7 @@ func Test_GetTaskTrackerCLI(t *testing.T) {
 			out = bytes.NewBuffer(nil)
 
 			os.Args = tt.osArgs
-			taskTracker()
+			main()
 			if actual := out.(*bytes.Buffer).String(); actual != tt.output {
 				t.Errorf("expected '%s', but got '%s'", tt.output, actual)
 			}
@@ -64,17 +64,26 @@ func Test_GetIncorrectInputs(t *testing.T) {
 		output string
 	}{
 
-		{"Wrong Argument --adding", []string{"cmd", "adding", `First Task`}, "Invalid command"},
-		{"Wrong Argument --updating", []string{"cmd", "updating", `First Task`}, "Invalid command"},
-		{"Wrong Argument --deleting", []string{"cmd", "deleting", `First Task`}, "Invalid command"},
-		//{"Wrong Argument --adding", []string{"cmd", "add"}, "Please provide task ID"},
+		{"Invalid Command", []string{"cmd", "adding", `First Task`}, "Invalid command"},
+		{"Missing Task ID for Update", []string{"cmd", "update"}, "Please provide task ID"},
+		{"Invalid Task ID for Update", []string{"cmd", "update", "abc", "New Description"}, "Invalid task ID"},
+		{"Missing Task ID for Delete", []string{"cmd", "delete"}, "Please provide task ID"},
+		{"Invalid Task ID for Delete", []string{"cmd", "delete", "abc"}, "Invalid task ID"},
+		{"Missing Task ID for Mark In Progress", []string{"cmd", "mark-in-progress"}, "Please provide task ID"},
+		{"Invalid Task ID for Mark In Progress", []string{"cmd", "mark-in-progress", "abc"}, "Invalid task ID"},
+		{"Missing Task ID for Mark Done", []string{"cmd", "mark-done"}, "Please provide task ID"},
+		{"Invalid Task ID for Mark Done", []string{"cmd", "mark-done", "abc"}, "Invalid task ID"},
+		{"Invalid List Status", []string{"cmd", "list", "unknown"}, "Invalid status"},
+		{"Missing Task Name for Add", []string{"cmd", "add"}, "Please provide task name"},
+		{"Missing Task Name for Update", []string{"cmd", "update", "1"}, "Please provide task name"},
+		{"No command", []string{"cmd"}, "Please provide any of the command"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			out = bytes.NewBuffer(nil)
 			os.Args = tt.osArgs
-			taskTracker()
+			main()
 			if actual := out.(*bytes.Buffer).String(); actual != tt.output {
 				t.Errorf("expected '%s', but got '%s'", tt.output, actual)
 			}
