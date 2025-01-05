@@ -30,13 +30,17 @@ func Test_GetTaskTrackerCLI(t *testing.T) {
 		{"First Non Deleted Task", []string{"cmd", "add", `First Non Deleted Task`}, "Task added successfully (ID: 4)"},
 		{"First Test Task", []string{"cmd", "add", `First Test Task`}, "Task added successfully (ID: 5)"},
 		{"First Updated Task", []string{"cmd", "update", "3", `First Updated Task`}, "Task updated successfully (ID: 3)"},
-		{"Deletd Task", []string{"cmd", "delete", "4"}, "Task deleted successfully (ID: 4)"},
+		{"Deleted Task", []string{"cmd", "delete", "4"}, "Task deleted successfully (ID: 4)"},
 		{"mark-in-progress", []string{"cmd", "mark-in-progress", "1"}, "Task updated to in-progress successfully (ID: 1)"},
 		{"mark-done", []string{"cmd", "mark-done", "2"}, "Task done successfully (ID: 2)"},
 		{"list-all", []string{"cmd", "list"}, ""},
 		{"list-done", []string{"cmd", "list", "done"}, ""},
 		{"list-todo", []string{"cmd", "list", "todo"}, ""},
 		{"list-in-progress", []string{"cmd", "list", "in-progress"}, ""},
+		{"Update Non-existent Task", []string{"cmd", "update", "999", "Non-existent Task"}, "Task ID (999) not found"},
+		{"Delete Non-existent Task", []string{"cmd", "delete", "999"}, "Task ID (999) not found"},
+		{"Mark In Progress Non-existent Task", []string{"cmd", "mark-in-progress", "999"}, "Task ID (999) not found"},
+		{"Mark Done Non-existent Task", []string{"cmd", "mark-done", "999"}, "Task ID (999) not found"},
 	}
 
 	//setup()
@@ -90,5 +94,3 @@ func Test_GetIncorrectInputs(t *testing.T) {
 		})
 	}
 }
-
-// func Suite

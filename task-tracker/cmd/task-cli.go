@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -25,15 +26,17 @@ func fileExists(filename string) error {
 	return nil
 }
 
-func getTaskList() (*[]Task, error) {
+func getTaskList(createFileIfNotExists bool) (*[]Task, error) {
 	var taskList []Task
 
 	err := fileExists(FileName)
-	if err != nil {
+	if err != nil && createFileIfNotExists {
 		_, err := os.Create(FileName)
 		if err != nil {
 			return nil, err
 		}
+	} else if err != nil {
+		return nil, errors.New("file does not exist. Please add a new task.")
 	} else {
 		file, err := os.ReadFile(FileName)
 		if err != nil {
@@ -41,9 +44,8 @@ func getTaskList() (*[]Task, error) {
 		}
 		err = json.Unmarshal(file, &taskList)
 		if err != nil {
-			return nil, fmt.Errorf("error marhsalling from File ,%s", err.Error())
+			return nil, fmt.Errorf("error marshalling from File ,%s", err.Error())
 		}
-
 	}
 
 	return &taskList, nil
@@ -63,7 +65,7 @@ func writeTaskList(taskList *[]Task) error {
 }
 func AddTask(task string) (int64, error) {
 	var newID int64
-	taskList, err := getTaskList()
+	taskList, err := getTaskList(true)
 	if err != nil {
 		return 0, err
 	}
@@ -90,16 +92,22 @@ func AddTask(task string) (int64, error) {
 
 func UpdateTask(description string, taskID int64) (int, error) {
 	// update task in the file
-	taskList, err := getTaskList()
+	taskList, err := getTaskList(false)
 	if err != nil {
 		return 0, err
 	}
+	updated := false
 	for index, _ := range *taskList {
 		if (*taskList)[index].ID == taskID {
 			(*taskList)[index].Description = description
 			(*taskList)[index].UpdatedAt = time.Now().UTC()
+			updated = true
 			break
 		}
+	}
+
+	if !updated {
+		return 0, fmt.Errorf("Task ID (%d) not found", taskID)
 	}
 
 	err = writeTaskList(taskList)
@@ -113,16 +121,21 @@ func UpdateTask(description string, taskID int64) (int, error) {
 func DeleteTask(taskID int64) (int, error) {
 	// delete task in the file
 	newTaskList := []Task{}
-	taskList, err := getTaskList()
+	taskList, err := getTaskList(false)
 	if err != nil {
 		return 0, err
 	}
+	deleted := false
 	for index, task := range *taskList {
 		if (*taskList)[index].ID != taskID {
 			newTaskList = append(newTaskList, task)
+		} else {
+			deleted = true
 		}
 	}
-
+	if !deleted {
+		return 0, fmt.Errorf("Task ID (%d) not found", taskID)
+	}
 	err = writeTaskList(&newTaskList)
 	if err != nil {
 		return 0, err
@@ -133,16 +146,21 @@ func DeleteTask(taskID int64) (int, error) {
 
 func MarkInProgress(taskID int64) (int, error) {
 	// make task in progress
-	taskList, err := getTaskList()
+	taskList, err := getTaskList(false)
 	if err != nil {
 		return 0, err
 	}
+	marked := false
 	for index, _ := range *taskList {
 		if (*taskList)[index].ID == taskID {
 			(*taskList)[index].Status = "in-progress"
 			(*taskList)[index].UpdatedAt = time.Now().UTC()
+			marked = true
 			break
 		}
+	}
+	if !marked {
+		return 0, fmt.Errorf("Task ID (%d) not found", taskID)
 	}
 
 	err = writeTaskList(taskList)
@@ -154,18 +172,23 @@ func MarkInProgress(taskID int64) (int, error) {
 
 func MarkDone(taskID int64) (int64, error) {
 	// mark task as done
-	taskList, err := getTaskList()
+	taskList, err := getTaskList(false)
 	if err != nil {
 		return 0, err
 	}
+	marked := false
 	for index, _ := range *taskList {
 		if (*taskList)[index].ID == taskID {
 			(*taskList)[index].Status = "done"
 			(*taskList)[index].UpdatedAt = time.Now().UTC()
+			marked = true
 			break
 		}
 	}
 
+	if !marked {
+		return 0, fmt.Errorf("Task ID (%d) not found", taskID)
+	}
 	err = writeTaskList(taskList)
 	if err != nil {
 		return 0, err
@@ -175,7 +198,7 @@ func MarkDone(taskID int64) (int64, error) {
 
 func GetList(status string) ([]Task, error) {
 	newTaskList := []Task{}
-	taskList, err := getTaskList()
+	taskList, err := getTaskList(false)
 	if err != nil {
 		return nil, err
 	}
@@ -193,6 +216,6 @@ func GetList(status string) ([]Task, error) {
 }
 func PrintTask(task Task) {
 
-	fmt.Printf("Task : %s, Status : %s, Created : %s, Updated :%s", task.Description, task.Status, task.CreatedAt.Format("2006-01-02 15:04:05"), task.UpdatedAt.Format("2006-01-02 15:04:05"))
+	fmt.Printf("ID : %d,Task : %s, Status : %s, Created : %s, Updated :%s", task.ID, task.Description, task.Status, task.CreatedAt.Format("2006-01-02 15:04:05"), task.UpdatedAt.Format("2006-01-02 15:04:05"))
 	fmt.Println()
 }

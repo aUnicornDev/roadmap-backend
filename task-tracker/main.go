@@ -16,25 +16,26 @@ func main() {
 	if len(os.Args) < 2 {
 		fmt.Fprint(out, "Please provide any of the command")
 		fmt.Println(`
-		# Adding a new task
-		task-cli add "Buy groceries"
-		# Output: Task added successfully (ID: 1)
-		
-		# Updating and deleting tasks
-		task-cli update 1 "Buy groceries and cook dinner"
-		task-cli delete 1
-		
-		# Marking a task as in progress or done
-		task-cli mark-in-progress 1
-		task-cli mark-done 1
-		
-		# Listing all tasks
-		task-cli list
-		
-		# Listing tasks by status
-		task-cli list done
-		task-cli list todo
-		task-cli list in-progress`)
+
+# Adding a new task
+task-cli add "Buy groceries"
+# Output: Task added successfully (ID: 1)
+
+# Updating and deleting tasks
+task-cli update 1 "Buy groceries and cook dinner"
+task-cli delete 1
+
+# Marking a task as in progress or done
+task-cli mark-in-progress 1
+task-cli mark-done 1
+
+# Listing all tasks
+task-cli list
+
+# Listing tasks by status
+task-cli list done
+task-cli list todo
+task-cli list in-progress`)
 		return
 	}
 	taskTracker()
@@ -44,7 +45,7 @@ func readTaskID() (int64, error) {
 		return 0, errors.New("Please provide task ID")
 
 	}
-	intTaskID, err := strconv.ParseInt(os.Args[2], 10, 8)
+	intTaskID, err := strconv.ParseInt(os.Args[2], 10, 64)
 	if err != nil {
 		return 0, errors.New("Invalid task ID")
 	}
