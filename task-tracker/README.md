@@ -2,6 +2,7 @@
 # Task Tracker CLI
 
 Task Tracker CLI is a command-line tool for managing tasks. You can add, update, delete, and list tasks, as well as mark them as in-progress or done.
+[Project Summary](https://roadmap.sh/projects/task-tracker)
 
 ## Installation
 
